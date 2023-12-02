@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SmartSwitch</title>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+        />
+        <style>
+            body {
+                background: #333;
+                font-family: sans-serif;
+                font-size: 14px;
+                color: #777;
+            }
+
+            .switchBox {
+                padding: 10px;
+                display: flex;
+                justify-items: center;
+                align-items: center;
+            }
+
+            .switch {
+                position: relative;
+                display: inline-block;
+                width: 60px;
+                height: 34px;
+                margin: 0 10px;
+            }
+
+            .switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #ccc;
+                -webkit-transition: 0.4s;
+                transition: 0.4s;
+            }
+
+            .slider:before {
+                position: absolute;
+                content: '';
+                height: 26px;
+                width: 26px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                -webkit-transition: 0.4s;
+                transition: 0.4s;
+            }
+
+            input:checked + .slider {
+                background-color: #2196f3;
+            }
+
+            input:focus + .slider {
+                box-shadow: 0 0 1px #2196f3;
+            }
+
+            input:checked + .slider:before {
+                -webkit-transform: translateX(26px);
+                -ms-transform: translateX(26px);
+                transform: translateX(26px);
+            }
+
+            .slider.round {
+                border-radius: 34px;
+            }
+
+            .slider.round:before {
+                border-radius: 50%;
+            }
+        </style>
+    </head>
+    <body>
+        <h3>Smart Switch</h3>
+        <div class="switchBox">
+            <label class="switch">
+                <input type="checkbox" id="switch0" onchange="toggle(0)" />
+                <span class="slider round"></span>
+            </label>
+            <label for="switch0">Switch 1</label>
+        </div>
+        <div class="switchBox">
+            <label class="switch">
+                <input type="checkbox" id="switch1" onchange="toggle(1)" />
+                <span class="slider round"></span>
+            </label>
+            <label for="switch1">Switch 2</label>
+        </div>
+        <div class="switchBox">
+            <label class="switch">
+                <input type="checkbox" id="switchauto0" onchange="mode(0)" />
+                <span class="slider round"></span>
+            </label>
+            <label for="switchauto0">Switch 1 Auto</label>
+        </div>
+        <div class="switchBox">
+            <label class="switch">
+                <input type="checkbox" id="switchauto1" onchange="mode(1)" />
+                <span class="slider round"></span>
+            </label>
+            <label for="switchauto1">Switch 2 Auto</label>
+        </div>
+        <script>
+            function toggle(index) {
+                var isChecked = document.getElementById(
+                    'switch' + index
+                ).checked
+
+                console.log(index, isChecked)
+
+                var xhr = new XMLHttpRequest()
+                var data = JSON.stringify({
+                    index,
+                    action: isChecked ? 'on' : 'off',
+                })
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        refresh()
+                    }
+                    if (xhr.readyState === 4 && xhr.status !== 200) {
+                        console.error('Failed!')
+                    }
+                }
+                xhr.open('POST', '/toggle', true)
+                xhr.setRequestHeader('Content-Type', 'application/json')
+                xhr.send(data)
+            }
+
+            function mode(index) {
+                var isChecked = document.getElementById(
+                    'switchauto' + index
+                ).checked
+
+                console.log(index, isChecked)
+
+                var xhr = new XMLHttpRequest()
+                var data = JSON.stringify({
+                    index,
+                    mode: isChecked ? 1 : 0,
+                })
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        refresh()
+                    }
+                    if (xhr.readyState === 4 && xhr.status !== 200) {
+                        console.error('Failed!')
+                    }
+                }
+                xhr.open('POST', '/mode', true)
+                xhr.setRequestHeader('Content-Type', 'application/json')
+                xhr.send(data)
+            }
+
+            function getToggleStatus(index) {
+                var xhr = new XMLHttpRequest()
+                xhr.open('GET', '/toggle?index=' + index, true)
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var response = xhr.responseText
+                        var jsonData = JSON.parse(response)
+
+                        console.log(jsonData, jsonData.data)
+
+                        if (jsonData.data && jsonData.data == 1) {
+                            document.getElementById(
+                                'switch' + index
+                            ).checked = true
+                        } else {
+                            document.getElementById(
+                                'switch' + index
+                            ).checked = false
+                        }
+                    }
+                }
+                xhr.send()
+            }
+
+            function getMode(index) {
+                var xhr = new XMLHttpRequest()
+                xhr.open('GET', '/mode?index=' + index, true)
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var response = xhr.responseText
+                        var jsonData = JSON.parse(response)
+
+                        console.log(jsonData, jsonData.data)
+
+                        if (jsonData.data && jsonData.data == 1) {
+                            document.getElementById(
+                                'switchauto' + index
+                            ).checked = true
+                        } else {
+                            document.getElementById(
+                                'switchauto' + index
+                            ).checked = false
+                        }
+                    }
+                }
+                xhr.send()
+            }
+
+            function refresh() {
+                getToggleStatus(0)
+                getToggleStatus(1)
+                getMode(0)
+                getMode(1)
+            }
+
+            window.onload = function () {
+                refresh()
+            }
+        </script>
+    </body>
+</html>
