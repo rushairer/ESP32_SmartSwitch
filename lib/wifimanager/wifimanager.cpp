@@ -45,24 +45,10 @@ WifiManager::~WifiManager()
 
 void WifiManager::setup()
 {
-    int trySTA = WifiManager::trySTA();
-    _serial->printf("trySTA: ");
-    _serial->println(trySTA);
+    connectToWiFi();
 
-    if (!trySTA)
-    {
-        if (!_wifi->softAP(apSsid, apPassword, 11))
-        {
-            log_e("Soft AP creation failed.");
-            while (1)
-                ;
-        }
-
-        _serial->print("IP Address: ");
-        _serial->println(_wifi->softAPIP());
-    }
-
-    std::function<void(void)> handleIndex = std::bind(&WifiManager::handleIndex, this);
+    std::function<void(void)>
+        handleIndex = std::bind(&WifiManager::handleIndex, this);
     std::function<void(void)> handleSavePassword = std::bind(&WifiManager::handleSavePassword, this);
     std::function<void(void)> handleClearPassword = std::bind(&WifiManager::handleClearPassword, this);
 
@@ -87,6 +73,13 @@ void WifiManager::setup()
 
 void WifiManager::loop()
 {
+
+    if (_wifi->status() != WL_CONNECTED)
+    {
+        Serial.println("Retry connect...");
+        connectToWiFi();
+    }
+
     _webServer.handleClient();
 }
 
@@ -255,6 +248,26 @@ void WifiManager::handleClearPassword()
 
     _webServer.sendHeader("Content-Type", "application/json");
     _webServer.send(200, "application/json", jsonData);
+}
+
+void WifiManager::connectToWiFi()
+{
+    int trySTA = WifiManager::trySTA();
+    _serial->printf("trySTA: ");
+    _serial->println(trySTA);
+
+    if (!trySTA)
+    {
+        if (!_wifi->softAP(apSsid, apPassword, 11))
+        {
+            log_e("Soft AP creation failed.");
+            while (1)
+                ;
+        }
+
+        _serial->print("IP Address: ");
+        _serial->println(_wifi->softAPIP());
+    }
 }
 
 int WifiManager::trySTA()

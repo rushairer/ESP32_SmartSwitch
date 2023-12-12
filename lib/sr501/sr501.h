@@ -7,7 +7,7 @@ class SR501Service;
 class SR501Service
 {
 public:
-    SR501Service(int pin = 1, uint8_t bits = 12);
+    SR501Service(int pin = 1);
     virtual ~SR501Service();
 
     void loop();

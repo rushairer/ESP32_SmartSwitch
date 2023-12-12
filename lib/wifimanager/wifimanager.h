@@ -35,7 +35,8 @@ private:
     void handleIndex();
     void handleSavePassword();
     void handleClearPassword();
-
+    void connectToWiFi();
+    
     char *_hostName;
 };
 
