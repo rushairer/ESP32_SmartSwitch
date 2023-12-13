@@ -1,5 +1,8 @@
 #include "smartswitchmanager.h"
 #include <ArduinoJson.h>
+#include <TimeLib.h>
+#include <time.h>
+#include <esp_sntp.h>
 
 SmartSwitchManager::SmartSwitchManager(std::vector<SmartSwitch *> switches, int serverPort, SR501Service *sr501)
     : _webServer(serverPort),
@@ -49,6 +52,9 @@ void SmartSwitchManager::setup()
         handleChangeMode);
 
     _webServer.begin();
+
+    sntp_servermode_dhcp(1);
+    configTime(0, 0, "ntp.ntsc.ac.cn", "ntp1.aliyun.com", "ntp.org.cn");
 }
 
 void SmartSwitchManager::setupSwitchs()
@@ -230,6 +236,22 @@ void SmartSwitchManager::handleIndex()
     </head>
     <body>
         <h3>Smart Switch</h3>
+)***";
+
+    time_t now;
+    time(&now);
+    struct tm *timeinfo = localtime(&now);
+    int hour = timeinfo->tm_hour;
+    int minute = timeinfo->tm_min;
+    int second = timeinfo->tm_sec;
+    String timeString = "<b>";
+    timeString += String(hour) + ":";
+    timeString += String(minute) + ":";
+    timeString += String(second) + "</b>";
+
+    indexHTMLString += timeString;
+
+    indexHTMLString += R"***(
         <div class="switchBox">
             <label class="switch">
                 <input type="checkbox" id="switch0" onchange="toggle(0)" />
@@ -372,6 +394,7 @@ void SmartSwitchManager::handleIndex()
 </html>
 
 )***";
+
     _webServer.sendHeader("Connection", "close");
     _webServer.send(200, "text/html", indexHTMLString);
 }

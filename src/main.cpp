@@ -4,8 +4,7 @@
 #include <WebServer.h>
 #include <ESPmDNS.h>
 #include <Freenove_WS2812_Lib_for_ESP32.h>
-#include <NTPClient.h>
-#include <TimeLib.h>
+#include <time.h>
 
 #include "ota.h"
 #include "sr501.h"
@@ -22,9 +21,6 @@ SmartSwitchManager smartswitchManager({&ss1, &ss2}, 80, &sr501);
 
 Freenove_ESP32_WS2812 strip = Freenove_ESP32_WS2812(1, 8, 0, TYPE_RGB);
 
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org");
-
 void setup()
 {
     Serial.begin(115200);
@@ -40,10 +36,6 @@ void setup()
 
     strip.begin();
     strip.setBrightness(20);
-
-    // 初始化NTP客户端
-    timeClient.begin();
-    timeClient.setTimeOffset(28800); // 设置时区（单位：秒），东8区为28800秒
 }
 
 void loop()
@@ -64,13 +56,12 @@ void loop()
         delay(10);
     }
 
-    // 更新时间
-    timeClient.update();
-
-    // 获取当前时间
-    int currentHour = hour();
-    int currentMinute = minute();
-    int currentSecond = second();
+    time_t now;
+    time(&now);
+    struct tm *timeinfo = localtime(&now);
+    int currentHour = timeinfo->tm_hour;
+    int currentMinute = timeinfo->tm_min;
+    int currentSecond = timeinfo->tm_sec;
 
     // 执行任务
     if (currentHour == 1 && currentMinute == 0 && currentSecond == 0)
