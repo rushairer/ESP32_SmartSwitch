@@ -1,15 +1,9 @@
 #include "wifimanager.h"
 #include <ArduinoJson.h>
+#include "stringify.h"
 
 static const int ssidEEPROMAddress = 0x100;
 static const int passwordEEPROMAddress = 0x120;
-
-#ifndef STRINGIFY
-
-#define STRINGIFY(x) #x
-#define EXPAND_AND_STRINGIFY(x) STRINGIFY(x)
-
-#endif
 
 #ifdef AP_SSID
 static const char *apSsid = EXPAND_AND_STRINGIFY(AP_SSID);
