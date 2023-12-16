@@ -10,6 +10,7 @@ public:
     SR501Service(int pin = 1);
     virtual ~SR501Service();
 
+    void setup();
     void loop();
     int getStatus();
 

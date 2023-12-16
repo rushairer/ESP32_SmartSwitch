@@ -17,8 +17,10 @@ SmartSwitchManager::~SmartSwitchManager()
 void SmartSwitchManager::setup()
 {
     setupSwitchs();
+    _sr501->setup();
 
-    std::function<void(void)> handleIndex = std::bind(&SmartSwitchManager::handleIndex, this);
+    std::function<void(void)>
+        handleIndex = std::bind(&SmartSwitchManager::handleIndex, this);
     std::function<void(void)> handleGetToggle = std::bind(&SmartSwitchManager::handleGetToggle, this);
     std::function<void(void)> handleGeteMode = std::bind(&SmartSwitchManager::handleGeteMode, this);
     std::function<void(void)> handleChangeToggle = std::bind(&SmartSwitchManager::handleChangeToggle, this);

@@ -14,7 +14,7 @@
 
 WifiManager wifiManager((char *)"smartlight", &WiFi, &MDNS, &Serial, 8081);
 OTAService ota(8080);
-SR501Service sr501(1);
+SR501Service sr501(A1);
 
 SmartSwitch ss1(2);
 SmartSwitch ss2(21);
@@ -70,7 +70,6 @@ void loop()
     for (int j = 0; j < 255; j += 2)
     {
         strip.setLedColorData(0, strip.Wheel((256 / 1 + j) & 255));
-
         strip.show();
         delay(10);
     }

@@ -15,9 +15,15 @@ int SR501Service::getStatus()
     return _status;
 }
 
+void SR501Service::setup()
+{
+    adcAttachPin(_pin);
+}
+
 void SR501Service::loop()
 {
-    if (analogRead(_pin) > 4000)
+    int adcValue = analogRead(_pin);
+    if (adcValue > 4000)
     {
         _status = 1;
     }
@@ -25,6 +31,8 @@ void SR501Service::loop()
     {
         _status = 0;
     }
+
+    Serial.printf("ADC Value(%d):%d, status: %d \r\n", _pin, adcValue, _status);
 
     delay(10);
 }
