@@ -14,10 +14,10 @@
 
 WifiManager wifiManager((char *)"smartlight", &WiFi, &MDNS, &Serial, 8081);
 OTAService ota(8080);
-SR501Service sr501(A1);
+SR501Service sr501(3);
 
-SmartSwitch ss1(2);
-SmartSwitch ss2(21);
+SmartSwitch ss1(4);
+SmartSwitch ss2(5);
 SmartSwitchManager smartswitchManager({&ss1, &ss2}, 80, &sr501);
 
 Freenove_ESP32_WS2812 strip = Freenove_ESP32_WS2812(1, 8, 0, TYPE_RGB);
@@ -33,6 +33,9 @@ NTPClient timeClient(ntpUDP, ntpServer, 28800, 1000 * 60 * 60);
 
 TaskHandle_t taskHandle;
 void taskFunction(void *parameter);
+
+TaskHandle_t initLightHandle;
+void initLightFunction(void *parameter);
 
 void setup()
 {
@@ -54,6 +57,7 @@ void setup()
     strip.begin();
     strip.setBrightness(20);
 
+    xTaskCreate(initLightFunction, "InitLight", 4096, NULL, 1, &initLightHandle);
     xTaskCreate(taskFunction, "Task", 4096, NULL, 1, &taskHandle);
 }
 
@@ -75,6 +79,13 @@ void loop()
     }
 }
 
+void initLightFunction(void *parameter)
+{
+    delay(1000);
+    smartswitchManager.turnOnAllSwitch();
+    vTaskDelete(initLightHandle);
+}
+
 void taskFunction(void *parameter)
 {
     while (true)
@@ -84,17 +95,7 @@ void taskFunction(void *parameter)
         int currentHour = timeClient.getHours();
         int currentMinute = timeClient.getMinutes();
         int currentSecond = timeClient.getSeconds();
-        Serial.println(timeClient.getFormattedTime());
-
-        // 获取时间戳
-        unsigned long epochTime = timeClient.getEpochTime();
-        // 设置系统时间
-        struct timeval tv;
-        tv.tv_sec = epochTime;
-        tv.tv_usec = 0;
-        settimeofday(&tv, NULL);
-
-        struct tm timeInfo;
+        Serial.printf("time: %s\r\n", timeClient.getFormattedTime());
 
         // 执行任务
         if (currentHour == 1 && currentMinute == 0 && currentSecond == 0)

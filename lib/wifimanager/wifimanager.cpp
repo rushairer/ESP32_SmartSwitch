@@ -289,7 +289,7 @@ int WifiManager::trySTA()
         _serial->printf("Wifi Status: %d, IP Address: %s \r\n", _wifi->status(), _wifi->localIP().toString());
         delay(300);
         tried++;
-        if (tried > 30)
+        if (tried > 50)
         {
             return 0;
         }

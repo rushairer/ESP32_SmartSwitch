@@ -15,7 +15,7 @@ SmartSwitch::~SmartSwitch()
 void SmartSwitch::setup()
 {
     pinMode(_switchPin, OUTPUT);
-    digitalWrite(_switchPin, HIGH);
+    digitalWrite(_switchPin, LOW);
 }
 
 void SmartSwitch::turnOn()
