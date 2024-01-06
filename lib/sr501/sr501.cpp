@@ -32,7 +32,7 @@ void SR501Service::loop()
         _status = 0;
     }
 
-    Serial.printf("ADC Value(%d):%d, status: %d \r\n", _pin, adcValue, _status);
+    Serial.printf("ADC Value(Pin %d):%d, SR501 status: %d \r\n", _pin, adcValue, _status);
 
     delay(10);
 }
